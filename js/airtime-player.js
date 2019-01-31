@@ -85,6 +85,37 @@ var MusesPlayer = function() {
     // detects events in HTML5 mode
     if (!this.flashDetect) {
 
+        var updatePlayerUI = function(e){
+            console.log("Event fired -> updatePlayerUI")
+            console.log(e)
+            console.log(MRP.html.audio.paused)
+
+            switch (e.type) {
+                case "play":
+                    $(".play_button").addClass("playing");
+                    $(".play_button").removeClass("paused");
+                    $(".play_button").html("Playing");
+                    break;
+                case "pause":
+                case "ended":
+                case "abort":
+                    $(".play_button").addClass("paused");
+                    $(".play_button").removeClass("playing");
+                    $(".play_button").html("Paused");
+                    break;
+                case "error":
+                    $(".play_button").removeClass("playing");
+                    $(".play_button").html("Error");
+                    break;
+            }
+        }
+
+        MRP.html.audio.addEventListener('play', updatePlayerUI)
+        MRP.html.audio.addEventListener('pause', updatePlayerUI)
+        MRP.html.audio.addEventListener('ended', updatePlayerUI)
+        MRP.html.audio.addEventListener('error', updatePlayerUI)
+        MRP.html.audio.addEventListener('abort', updatePlayerUI)
+
         MRP.html.audio.addEventListener('error', function failed(e) {
             var streamUrl = "";
             if (musesPlayer.playerMode == "auto") {
@@ -94,8 +125,10 @@ var MusesPlayer = function() {
                 streamUrl = musesPlayer.settings.url;
             }
 
-
             var title_elem = $(".now_playing .track_title");
+
+            title_elem.text("Error - Retrying");
+
             switch (e.target.error.code) {
                 case e.target.error.MEDIA_ERR_NETWORK:
                     // If there is a network error keep retrying to connect
@@ -112,21 +145,14 @@ var MusesPlayer = function() {
                     title_elem.attr("title", "Error - Try again later");
                     break;
                 case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                    // If in auto mode and the current stream format is not supported
+                    // If in manual mode and the current stream format is not supported
                     // or the max number of listeners has been reached
-                    // retry connection with the next available stream.
-                    if (musesPlayer.playerMode == "auto") {
-                        musesPlayer.deferredPlay(nextAvailableStream["url"], RETRY_DELAY_MSECS);
-                    } else {
-                        // If in manual mode and the current stream format is not supported
-                        // or the max number of listeners has been reached
-                        // display an error and stop play back.
-                        //togglePlayStopButton();
-                        clearTimeout(metadataTimer);
-                        //$("p.now_playing").html("Error - Try again later");
-                        title_elem.text("Error - Try again later");
-                        title_elem.attr("title", "Error - Try again later");
-                    }
+                    // display an error and stop play back.
+                    //togglePlayStopButton();
+                    clearTimeout(metadataTimer);
+                    //$("p.now_playing").html("Error - Try again later");
+                    title_elem.text("Error - Try again later");
+                    title_elem.attr("title", "Error - Try again later");
                     break;
                 default:
                     //togglePlayStopButton();
@@ -191,12 +217,12 @@ MusesPlayer.prototype.getNextAvailableDesktopStream = function() {
 
 MusesPlayer.prototype.play = function() {
     this.flashDetect ? MRP.play() : musesHTMLPlayClick();;
-    //togglePlayStopButton();
+    togglePlayStopButton();
 };
 
 MusesPlayer.prototype.stop = function() {
     this.flashDetect ? MRP.stop() : musesHTMLStopClick();
-    //togglePlayStopButton();
+    togglePlayStopButton();
 };
 
 MusesPlayer.prototype.toggle = function() {
@@ -227,11 +253,6 @@ MusesPlayer.prototype.deferredPlay = function(streamUrl, delayMSec) {
             audio[0].play();
         }, delayMSec);
 
-    } else {
-        setTimeout(function() {
-            musesPlayer.setURL(streamUrl);
-            musesPlayer.play();
-        }, delayMSec);
     }
 };
 MusesPlayer.prototype.setVolume = function (newVolume) {
@@ -270,7 +291,7 @@ function musesCallback(event,value) {
                 // the stream display an error and stop play back.
                 MRP.stop();
                 if ($("#play_button").hasClass("hide_button")) {
-                    togglePlayStopButton();
+                    //togglePlayStopButton();
                 }
                 clearTimeout(metadataTimer);
                 //$("p.now_playing").html("Error - Try again later");

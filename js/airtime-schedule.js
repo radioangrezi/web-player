@@ -86,7 +86,6 @@ $.getJSON("https://sourcefabric.airtime.pro/api/week-info?callback=?",function(c
       $('.calendar__data').append(episode);
     }).fail(function(){
       // failed to load
-      $('.calendar__data').append('<p>There seems to be a temporary issue connecting to Airtime. Meanwhile you can <a href="/listen/">listen</a> to shows from the archive.</p>');
-      homeButtons();
+      $('.calendar__data').append('<p>There seems to be a temporary issue connecting to the Studio. Damn.</p>');
     });
 });
