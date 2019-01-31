@@ -166,12 +166,12 @@
     g.getScriptBaseHREF = function() {
         //return ("https:" == window.document.location.protocol ? "https://" : "http://") + "hosted.muses.org"
         // hack to self-host muses components - DR
-        return location.protocol + '//' + location.host
+        return "."
     };
     g.getSkin = function(a, c) {
         //return -1 != a.indexOf("/") || c && ("original" == a || "tiny" == a) ? a : g.getScriptBaseHREF() + "/muses-" + a + ".xml"
         // hack to self-host skin files - DR
-        return -1 != a.indexOf("/") || c && ("original" == a || "tiny" == a) ? a : g.getScriptBaseHREF() + "/js/airtime/player/" + a + ".xml"
+        return -1 != a.indexOf("/") || c && ("original" == a || "tiny" == a) ? a : g.getScriptBaseHREF() + "/js/airtime/" + a + ".xml"
     };
     g.insert = function(a) {
         null == a.elementId && null != g.elementId && (a.elementId = g.elementId);
@@ -185,7 +185,8 @@
             b = '<div id="' + c + '" style="width:' + a.width + "px;height:" + a.height + 'px"></div>';
         null == a.elementId ? window.document.write(b) : window.document.getElementById(a.elementId).innerHTML = b;
         a.elementId = c;
-        a.skin = g.getSkin(a.skin, !1);
+        if(a.skin)
+            a.skin = g.getSkin(a.skin, !1);
         new d.Muses(a)
     };
     g.flashInsert = function(a) {
@@ -2300,7 +2301,7 @@
         this.src = a.url;
         this.name = a.title;
         this.audio = new Audio;
-        this.ui = new d.UI(this, a);
+        //this.ui = new d.UI(this, a);
         a.autoplay && (a = window.navigator.userAgent.toLowerCase(), -1 == a.indexOf("iphone") && -1 == a.indexOf("ipad") && -1 == a.indexOf("ipod") &&
         this.playAudio())
         n.MRP.html = this;

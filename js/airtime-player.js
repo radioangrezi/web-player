@@ -1,6 +1,12 @@
+// copyright: Sourcefabric - AirTime
+// embend player version 2019-01-31
+
+// --
+
+// modified version to slim down the code, dependecies and have a custom UI.
+
 // This variable is used to record the current track's name for twitter share.
 var song_name = "";
-$.i18n.setDictionary(general_dict);
 
 var RETRY_DELAY_MSECS = 2000; //Delay before trying to reconnect to stream after an error.
 var MAX_MOBILE_SCREEN_WIDTH = 760;
@@ -14,6 +20,7 @@ var MAX_MOBILE_SCREEN_WIDTH = 760;
 // 2. We had to add in some custom behaviour depending on the player
 //    customizations and whether or not the player is in Flash or HTML5
 //    mode.
+
 var MusesPlayer = function() {
     this.mobileDetect = this.mobileDetect();
     this.playerMode = "auto";
@@ -24,9 +31,7 @@ var MusesPlayer = function() {
         'jsevents': true,
         'autoplay': false,
         'buffering': 0,
-        'title': 'test',
-        'bgcolor': '#FFFFFF',
-        'skin': 'ffmp3-mcclean',
+        'title': 'Radio Angrezi',
         'reconnectTime' : 2000, //Doesn't seem to do anything
         'width': 180,
         'height': 60
@@ -40,13 +45,23 @@ var MusesPlayer = function() {
         this.settings.codec = "";
     } else if (this.playerMode == "auto") {
         this.availableMobileStreamQueue = [];
-        this.availableDesktopStreamQueue = [{"url":"http:\/\/master.a.airtime.pro:8008\/sourcefabric_b","codec":"mp3","bitrate":128,"mobile":"0"},{"url":"http:\/\/sourcefabric.out.airtime.pro:8000\/sourcefabric_a","codec":"mp3","bitrate":192,"mobile":"0"}];
+        this.availableDesktopStreamQueue = [
+        {
+            "url":"http:\/\/sourcefabric.out.airtime.pro:8000\/sourcefabric_b",
+            "codec":"mp3",
+            "bitrate":128,
+            "mobile":"1"
+        },{
+            "url":"http:\/\/sourcefabric.out.airtime.pro:8000\/sourcefabric_a",
+            "codec":"mp3",
+            "bitrate":192,
+            "mobile":"0"
+        }];
         var stream = this.getNextAvailableStream();
         this.settings.url = stream["url"];
         this.settings.codec = stream["codec"];
     }
 
-    // Create the Muses player object
     // Create the Muses player object
     if (this.flashDetect) {
         MRP.flashInsert(this.settings);
@@ -90,7 +105,7 @@ var MusesPlayer = function() {
                 case e.target.error.MEDIA_ERR_DECODE:
                     // If there was a corruption error or a problem with the browser
                     // display an error and stop playback.
-                    togglePlayStopButton();
+                    //togglePlayStopButton();
                     clearTimeout(metadataTimer);
                     //$("p.now_playing").html("Error - Try again later");
                     title_elem.text("Error - Try again later");
@@ -106,7 +121,7 @@ var MusesPlayer = function() {
                         // If in manual mode and the current stream format is not supported
                         // or the max number of listeners has been reached
                         // display an error and stop play back.
-                        togglePlayStopButton();
+                        //togglePlayStopButton();
                         clearTimeout(metadataTimer);
                         //$("p.now_playing").html("Error - Try again later");
                         title_elem.text("Error - Try again later");
@@ -114,7 +129,7 @@ var MusesPlayer = function() {
                     }
                     break;
                 default:
-                    togglePlayStopButton();
+                    //togglePlayStopButton();
                     clearTimeout(metadataTimer);
                     //$("p.now_playing").html("Error - Try again later");
                     title_elem.text("Error - Try again later");
@@ -176,12 +191,17 @@ MusesPlayer.prototype.getNextAvailableDesktopStream = function() {
 
 MusesPlayer.prototype.play = function() {
     this.flashDetect ? MRP.play() : musesHTMLPlayClick();;
-    togglePlayStopButton();
+    //togglePlayStopButton();
 };
 
 MusesPlayer.prototype.stop = function() {
     this.flashDetect ? MRP.stop() : musesHTMLStopClick();
-    togglePlayStopButton();
+    //togglePlayStopButton();
+};
+
+MusesPlayer.prototype.toggle = function() {
+    this.flashDetect ? MRP.stop() : musesHTMLToggleClick();
+    //togglePlayStopButton();
 };
 
 MusesPlayer.prototype.setURL = function(url) {
@@ -275,6 +295,10 @@ function musesHTMLStopClick() {
     //delete MRP.html;
 }
 
+function musesHTMLToggleClick() {
+    MRP.html.audio.paused ? musesHTMLPlayClick() : musesHTMLStopClick();
+}
+
 function musesHTMLSetURL(url)
 {
     MRP.html.audio.src = url;
@@ -285,11 +309,6 @@ function musesHTMLSetURL(url)
 
 function musesHTMLSetCodec(codec) {
     MRP.html.audio.codec = codec;
-}
-
-function togglePlayStopButton() {
-    document.getElementById("play_button").classList.toggle("hide_button");
-    document.getElementById("stop_button").classList.toggle("hide_button");
 }
 
 function musesHTMLSetVolume(newVolume){
@@ -323,8 +342,10 @@ function attachStreamMetadataToPlayer(){
         success: function(data) {
             var title_elm = $(".now_playing .track_title");
             var artist_elm = $(".now_playing .artist");
-            var str_off_air = $.i18n._("Off Air");
-            var str_offline = $.i18n._("Offline");
+            var show_elm = $(".now_playing .show_title");
+            var description_elm = $(".now_playing .show_description");
+            var str_off_air = "Off Air";
+            var str_offline = "Offline";
             if (data.current === null) {
                 //title_elm.attr("title", $.i18n._("Off Air"));
                 //artist_elm.attr("title", $.i18n._("Offline"));
@@ -339,6 +360,19 @@ function attachStreamMetadataToPlayer(){
                 var artist = "";
                 var track = "";
                 //var nowPlayingHtml = "";
+
+                show = data.currentShow[0].name;
+                description = data.currentShow[0].description;
+
+                if (show) {
+                    show_elm.html(show);
+                    show_elm.attr("title", show_elm.text());
+                }
+
+                if (description) {
+                    description_elm.html(description);
+                    description_elm.attr("title", description_elm.text());
+                }
 
                 if (data.current.type == 'livestream')
                 {
@@ -420,12 +454,12 @@ function attachStreamMetadataToPlayer(){
                 metadataTimer = setTimeout(attachStreamMetadataToPlayer, time_to_next_track_starts+3000);
             }
 
-            if (data.next === null) {
-                $("ul.schedule_list").find("li").html($.i18n._("Nothing scheduled"));
-            } else {
-                $("ul.schedule_list").find("li").html(data.next.name);
-                $("ul.schedule_list").find("li").attr("title", function () {return $(this).text();});
-            }
+            // if (data.next === null) {
+            //     $("ul.schedule_list").find("li").html($.i18n._("Nothing scheduled"));
+            // } else {
+            //     $("ul.schedule_list").find("li").html(data.next.name);
+            //     $("ul.schedule_list").find("li").attr("title", function () {return $(this).text();});
+            // }
         }
     });
 
