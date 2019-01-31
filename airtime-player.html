@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <script src="node_modules/jquery/dist/jquery.min.js" type="text/javascript"></script>
+
+    <script src="js/mrp.js" type="text/javascript"></script>
+    <script type="text/javascript" src="js/airtime-player.js"></script>
+
+    <script type="text/javascript" src="node_modules/moment/moment.js"></script>
+    <script type="text/javascript" src="js/airtime-schedule.js"></script>
+
+</head>
+
+<body>
+
+<div id="player">
+    <div class="airtime_player">
+
+        <div class="airtime_header">
+            <div class="station_name">Radio Angrezi</div>
+        </div>
+
+        <div class="airtime_box">
+            <div class="airtime_button">
+                <button id="play_button" class="play_button" onclick="musesPlayer.toggle()">Play</button>
+            </div>
+            <p class="now_playing">
+                <span class="track_title"></span><br/>
+                <span class="artist"></span><br/>
+                <span class="show_title"></span><br/>
+                <span class="show_description"></span><br/>
+            </p>
+
+        </div>
+
+    </div>
+    
+</div>
+
+<div id="muses_skin">
+    <script type="text/javascript">
+        var musesPlayer = new MusesPlayer();
+    </script>
+</div>
+
+<div id="calendar" class="side-panel calendar" itemscope itemtype="https://schema.org/RadioSeries">
+    <span class="icon-cancel"></span><span class="calendar__title">Radio Schedule</span>
+    <div class="calendar__wrapper">
+        <div class="calendar__data"></div>
+    </div>
+</div>
+
+</body></html>

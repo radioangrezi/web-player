@@ -1,0 +1,18 @@
+{
+  "name": "web-player",
+  "version": "1.0.0",
+  "description": "A simple HTML player for Icecast and Airtime / Libretime.",
+  "main": "app.js",
+  "dependencies": {
+    "amplitudejs": "^4.0.0",
+    "jquery": "^3.3.1",
+    "moment": "^2.24.0",
+    "requirejs": "^2.3.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
