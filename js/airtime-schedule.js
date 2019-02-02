@@ -10,17 +10,25 @@ function convertDate(timestamp) {
   return dateFormatted;
 }
 
- var timeNow = Date.now()/1000;
+ var timeNow = Date.now()/1000 - 86400;
 
 $(document).ready(function() {
-$.getJSON("https://sourcefabric.airtime.pro/api/week-info?callback=?",function(calendarProgram){
+$.getJSON("http://stream.radioangrezi.de/api/week-info?callback=?",function(calendarProgram){
       var episode = "", episodeDay=false;
       for(var x in calendarProgram) {
         for (var y in calendarProgram[x]) {
           var z = calendarProgram[x][y],
               episodeName = z['instance_description'] || z['name'],
+              episodeDescription = z['description']
               episodeDate = z['starts'],
               episodeDateEnd = z['ends'];
+
+          var filterout_expr = /test/i;
+
+          if (filterout_expr.test(episodeName)) {
+            continue;
+          }
+
           if (typeof episodeName !== 'undefined' && typeof episodeDate !== 'undefined') {
 
             // start time
@@ -77,12 +85,12 @@ $.getJSON("https://sourcefabric.airtime.pro/api/week-info?callback=?",function(c
                 }
 
               }
-              episode = episode+"<div class='row calendar__show"+currentEpisode+"' itemprop='episode' itemscope itemtype='https://schema.org/RadioEpisode'><div class='xs-2' itemprop='publication' itemscope itemtype='https://schema.org/BroadcastEvent'><meta itemprop='startDate' content='"+episodeDateISO+"'><meta itemprop='endDate' content='"+episodeDateEndISO+"'>"+episodeTime+"</div><div class='xs-10' itemprop='name'>"+episodeName+"</div></div>";
+              episode = episode+"<div class='row calendar__show"+currentEpisode+"' itemprop='episode' itemscope itemtype='https://schema.org/RadioEpisode'><div class='xs-2' itemprop='publication' itemscope itemtype='https://schema.org/BroadcastEvent'><meta itemprop='startDate' content='"+episodeDateISO+"'><meta itemprop='endDate' content='"+episodeDateEndISO+"'>"+episodeTime+"</div><div class='xs-10' itemprop='name'>"+episodeName+"</div><div class='xs-10' itemprop='description'>"+episodeDescription+"</div></div><br/>";
             }
           }
         }
       }
-      $('.calendar__data').append('<div class="row"><div class="xs-10 xs-offset-2"><h2>Weekly schedule (CET)</h2></div></div>');
+      $('.calendar__data').append('<div class="row"><div class="xs-10 xs-offset-2"><h2>Live Schedule</h2></div></div>');
       $('.calendar__data').append(episode);
     }).fail(function(){
       // failed to load
